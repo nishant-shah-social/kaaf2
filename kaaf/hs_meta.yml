@@ -1,0 +1,11 @@
+---
+
+sandbox_tests:
+  test_kafka_events:
+    fixture:
+      method: nrepl
+      nrepl_port: 6970
+      code: fixtures/moby_setup.clj
+    config_template: resources/config.properties.j2
+    config_file: resources/config.properties
+    command: "lein do clean, compile, run false scenarios.edn 'Basic issue life cycle'"

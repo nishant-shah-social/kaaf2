@@ -1,0 +1,87 @@
+[{:scenario "Basic issue life cycle"
+  :actions [{:id 1
+             :action [:create :sdk :issue] ;; emulates user creates an issue via sdk
+             :description "User creates an issue via sdk"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:create_issue_by_customer
+                                          :first_reply_to_issue_by_customer]}},
+            {:id 2
+             :action [:create :sdk :message] ;; emulates user adding a message to an issue via sdk
+             :description "User sends a message to the issue"
+             :ctx {:op {:env :localshiva}
+                   :entity {:message-text "Facing issues while making payment"
+                            :issue_id {:val-from-above-actions "1.id"}
+                            ;; below field was added just to test the framework
+                            ;; :general {:features-enabled
+                            ;;           {:anon
+                            ;;            {:val-from-above-actions "1.publish_id"}}}
+                            }}
+             :contract {:exactly-ordered [:reply_to_issue_by_customer]}},
+            {:id 3
+             :action [:create :anon :login] ;; emulates admin login via admin dashboard
+             :description "Agent/Admin logs into the dashboard"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:login_agent]}},
+            {:id 4
+             :action [:create :xhr :message] ;; emulates admin adding a new message to an issue via dashboard
+             :description "Agent/Admin sends message to an issue via dashboard"
+             :ctx {:op {:env :localshiva}
+                   :entity {:body "What exact issue you are facing"}}
+             :contract {:exactly-ordered [:assign_issue_to_agent
+                                          :reply_to_issue_by_agent]}},
+            {:id 5
+             :action [:update :xhr :issue] ;; emulates admin resolving the issue via dashboard
+             :description "Agent/Admin resolves the issue"
+             :ctx {:op {:env :localshiva}
+                   :entity {:status 2}}
+             :contract {:exactly-ordered [:resolve_issue]}}]},
+ {:scenario "Agent inserts tag to an issue"
+  :actions [{:action [:create :sdk :issue] ;; emulates user creates an issue via sdk
+             :description "User creates an issue via sdk"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:create_issue_by_customer
+                                          :first_reply_to_issue_by_customer]}},
+            {:action [:create :anon :login] ;; emulates admin login to dashboard
+             :description "Agent/Admin logs into the dashboard"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:login_agent]}},
+            {:action [:create :xhr :tags] ;; emulates admin creating a new tag via admin dashboard
+             :description "Agent/Admin creates a new tag from the dashboard"
+             :ctx {:op {:env :localshiva}
+                   :entity {:tags "payments"}}},
+            {:action [:read :xhr :issue-details] ;; emulates admin opening the above issue via dashboard
+
+
+             :description "Agent/Admin opens the issue in the dashboard"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:view_issue_by_agent]}},
+            {:action [:update :xhr :issue] ;; emulates admin adding the above created tag against the above
+             :description "Agent/Admin inserts tag to the issue"
+             :ctx {:op {:env :localshiva}
+                   :entity {:tags "payments"}}
+             :contract {:exactly-ordered [:add_tags_to_issue]
+                        :never [:assign_issue_to_agent]}}]},
+ {:scenario "Agent updates a cif of an isue"
+  :actions [{:action [:create :sdk :issue] ;; emulates user creating an issue via sdk
+             :description "User creates an issue via sdk"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:create_issue_by_customer
+                                          :first_reply_to_issue_by_customer]}},
+            {:action [:create :anon :login] ;; emulates admin login to the admin dashboard
+             :description "Agent/Admin logs into the dashboard"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:login_agent]}},
+            {:action [:create :xhr :cif] ;; emulates admin creating a new CIF via admin dashboard->Setttings
+             :description "Agent/Admin creates a new cif"
+             :ctx {:op {:env :localshiva}
+                   :entity {:type "singleline"}}
+             :contract {:exactly-ordered [:create_cif]}},
+            {:action [:read :xhr :issue-details] ;; emulates admin opening the above issue via dashboard
+             :description "Agent/Admin opens the issue in the dashboard"
+             :ctx {:op {:env :localshiva}}
+             :contract {:exactly-ordered [:view_issue_by_agent]}},
+            {:action [:update :xhr :issue-details] ;; emulates admin updating the above CIF with a value via admin dashboard
+             :description "Agent/Admin adds value against the cif for an issue"
+             :ctx {:op {:env :localshiva}
+                   :entity {:cif :framework}}
+             :contract {:exactly-ordered [:edit_cif_of_issue]}}]}]

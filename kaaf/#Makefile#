@@ -1,0 +1,15 @@
+#
+# Makefile for kaaf project
+#
+
+SHELL=/bin/bash
+
+LEIN_EXEC := "lein"
+
+compileclj:
+		@echo "\nRecompiling Clojure files"
+		$(LEIN_EXEC) do clean, deps, compile
+
+tests:
+		@echo "\nRunning kaaf unit tests"
+		$(LEIN_EXEC) test
